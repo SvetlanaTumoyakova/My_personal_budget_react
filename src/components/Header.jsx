@@ -33,16 +33,6 @@ function Header() {
                     <ul className="navbar-nav w-100 mb-2 mb-lg-0">
                         {isAuthenticated ? (
                             <>
-                                <li className="nav-item">
-                                    <NavLink className="nav-link ms-auto" to="/cart">
-                                        Счета
-                                    </NavLink>
-                                </li>
-                                <li>
-                                    <NavLink className="nav-link" to="/orders">
-                                        Транзакции
-                                    </NavLink>
-                                </li>
                                 <li className="nav-item ms-auto dropdown">
                                     <button
                                         className="btn btn-dark dropdown-toggle"

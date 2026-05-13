@@ -13,15 +13,12 @@ function Register() {
 
     const [error, setError] = useState(null);
 
-    const [loading, setLoading] = useState(false);
-
     const { register } = useContext(AuthContext);
 
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
-        setLoading(true);
 
         if (
             userName.trim() &&
@@ -45,8 +42,6 @@ function Register() {
                 await register(registerData);
             } catch (error) {
                 setError(error.message || "Ошибка регистрации. Пожалуйста, попробуйте позже.");
-            } finally {
-                setLoading(false);
             }
         } else {
             setError("Все поля обязательны для заполнения.");

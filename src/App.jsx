@@ -14,11 +14,7 @@ function App() {
         <Header />
         <div className="container my-5">
           <Routes>
-            <Route
-              path="/"
-              element={<Navigate to="/login" replace />}
-            />
-            <Route path="/home" element={
+            <Route path="/" element={
               <ProtectedRoute>
                 <Home />
               </ProtectedRoute>

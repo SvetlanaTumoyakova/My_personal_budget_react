@@ -13,6 +13,8 @@ function AuthProvider({ children }) {
     useEffect(() => {
         if (localStorage.getItem("token")) {
             getUser();
+        } else {
+            logout();
         }
     }, []);
 
@@ -51,7 +53,7 @@ function AuthProvider({ children }) {
 
             const data = await response.json();
             localStorage.setItem("token", data.token);
-            // await getUser();
+            await getUser();
         } catch (error) {
             console.error(error); // для отладки
             throw error;
@@ -78,7 +80,7 @@ function AuthProvider({ children }) {
 
             const data = await response.json();
             localStorage.setItem("token", data.token);
-            // await getUser();
+            await getUser();
         } catch (error) {
             console.error(error); // для отладки
             throw error;
@@ -88,7 +90,7 @@ function AuthProvider({ children }) {
     const getUser = async () => {
         try {
             const token = localStorage.getItem("token");
-            const response = await fetch(`${apiUrl}/profile`, {
+            const response = await fetch(`${apiUrl}/user`, {
                 method: "GET",
                 headers: {
                     Authorization: `Bearer ${token}`,
