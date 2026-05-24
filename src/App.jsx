@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
+import { AccountsProvider } from "./context/AccountsContext";
 import Header from "./components/Header";
 
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -16,7 +17,9 @@ function App() {
           <Routes>
             <Route path="/" element={
               <ProtectedRoute>
-                <Home />
+                <AccountsProvider>
+                  <Home />
+                </AccountsProvider>
               </ProtectedRoute>
             }
             />

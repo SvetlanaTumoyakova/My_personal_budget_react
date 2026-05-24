@@ -12,7 +12,7 @@ function Header() {
     return (
         <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
             <div className="container">
-                <a className="navbar-brand" href="#">
+                <a className="navbar-header" href="#">
                     Система учёта личных финансов
                 </a>
                 <button
