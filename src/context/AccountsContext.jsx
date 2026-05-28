@@ -1,6 +1,6 @@
 import { createContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import api from '../api/index.js';
 const AccountsContext = createContext();
 
 function AccountsProvider({ children }) {
@@ -9,7 +9,7 @@ function AccountsProvider({ children }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const apiUrl = 'https://localhost:7017/api/Account';
+    const apiUrl = '/Account';
     const token = localStorage.getItem('token');
 
     useEffect(() => {
@@ -21,12 +21,8 @@ function AccountsProvider({ children }) {
             setLoading(true);
             setError(null);
 
-            const response = await fetch(`${apiUrl}`, {
+            const response = await api(`${apiUrl}`, {
                 method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
             });
 
             if (!response.ok) {
