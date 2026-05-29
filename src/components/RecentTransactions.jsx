@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import '../assets/RecentTransactions.css';
+import { AccountsContext } from '../context/AccountsContext.jsx';
 import TransactionDetailsModal from './TransactionDetailsModal.jsx'
 import TransactionCreateModal from './CreateTransaction/TransactionCreateModal.jsx'
 import api from '../api/index';
@@ -16,6 +17,8 @@ const RecentTransactions = ({ currentAccountId }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
+    const { refreshAccounts } = useContext(AccountsContext);
+
     const apiUrl = "/Transaction";
 
     // Функция загрузки транзакций с сервера
@@ -24,7 +27,7 @@ const RecentTransactions = ({ currentAccountId }) => {
         setError(null);
         try {
             const response = await api(
-                `${apiUrl}?accountId=${currentAccountId}&page=${page}&per_page=${itemsPerPage}`
+                `${apiUrl}?accountId=${currentAccountId}&page=${page}&perPage=${itemsPerPage}`
             );
 
             if (!response.ok) {
@@ -34,8 +37,8 @@ const RecentTransactions = ({ currentAccountId }) => {
             const data = await response.json();
 
             setTransactions(data.data);
-            setTotalPages(data.meta.last_page);
-            setCurrentPage(data.meta.current_page);
+            setTotalPages(data.meta.lastPage);
+            setCurrentPage(data.meta.currentPage);
 
             if (data.warning) {
                 alert(data.warning);
@@ -129,6 +132,8 @@ const RecentTransactions = ({ currentAccountId }) => {
 
             setIsCreateModalOpen(false);
 
+            refreshAccounts();
+
             fetchTransactions(1, perPage);
 
             alert('Транзакция успешно создана!');
@@ -149,7 +154,7 @@ const RecentTransactions = ({ currentAccountId }) => {
         }
     };
 
-    console.log("is Create modal open", isCreateModalOpen);
+    console.log("cur", currentPage, totalPages);
 
     // Отображение состояния загрузки
     if (loading) {
@@ -212,7 +217,7 @@ const RecentTransactions = ({ currentAccountId }) => {
 
                         <div
                             key={transaction.id}
-                            className={`transaction-item ${transaction.transactionType === 'Income' ? 'income' : 'expense'}`}
+                            className={`transaction-item ${transaction.transactionType === 'Доход' ? 'income' : 'expense'}`}
                             onClick={() => handleViewDetails(transaction.id)}
                             style={{ cursor: 'pointer' }}
                         >
@@ -221,7 +226,7 @@ const RecentTransactions = ({ currentAccountId }) => {
                             </div>
                             <div className="transaction-name">{transaction.name}</div>
                             <div className="transaction-amount">
-                                {transaction.transactionType === 'Income'
+                                {transaction.transactionType === 'Доход'
                                     ? ` +${transaction.amount.toFixed(2)} ₽`
                                     : ` -${transaction.amount.toFixed(2)} ₽`}
                             </div>

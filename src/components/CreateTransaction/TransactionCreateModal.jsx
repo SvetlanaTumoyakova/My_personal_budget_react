@@ -4,6 +4,8 @@ import Modal from './Modal';
 import FormField from './FormField';
 import SelectField from './SelectField';
 import ProductList from './ProductList';
+import ExpenseFormPart from './ExpenseFormPart';
+import IncomeFormPart from './IncomeFormPart';
 
 const transactionTypes = [{
     id: '0219dfdb-fdae-4a26-b5d4-bdc74441e266',
@@ -25,16 +27,21 @@ const TransactionCreateModal = ({
         transactionTypeId: '',
         date: new Date().toISOString().split('T')[0],
         accountId: '',
+        amount: 0,
         description: '',
         products: []
     });
 
-    const amount = formData.products.reduce((sum, product) => {
-        const price = parseFloat(product.price) || 0;
-        const quantity = parseInt(product.quantity) || 0;
+    const recalculateAmount = (products) => {
+        const amount = products.reduce((sum, product) => {
+            const price = parseFloat(product.price) || 0;
+            const quantity = parseInt(product.quantity) || 0;
 
-        return sum + (price * quantity);
-    }, 0);
+            return sum + (price * quantity);
+        }, 0);
+
+        return amount;
+    };
 
     const [errors, setErrors] = useState({});
 
@@ -45,6 +52,7 @@ const TransactionCreateModal = ({
                 transactionTypeId: '',
                 date: new Date().toISOString().split('T')[0],
                 accountId: '',
+                amount: 0,
                 description: '',
                 products: []
             });
@@ -66,29 +74,55 @@ const TransactionCreateModal = ({
 
         setFormData(prev => ({
             ...prev,
-            products: [...updatedProducts]
+            products: updatedProducts,
+            amount: recalculateAmount(updatedProducts)
         }));
-
     };
 
-    const addProduct = (newProduct) => {
+    const handleAmountChange = (e) => {
+        const { value } = e.target;
         setFormData(prev => ({
             ...prev,
-            products: [
-                ...prev.products,
-                newProduct
-            ]
+            amount: value
+        }));
+    };
+
+    const handleTransactionTypeChange = (e) => {
+        const { value } = e.target;
+        const updatedProducts = value !== transactionTypes[1].id ? [...formData.products] : [];
+        setFormData(prev => ({
+            ...prev,
+            products: updatedProducts,
+            transactionTypeId: value,
+            amount: 0
+        }));
+    };
+
+
+    const addProduct = (newProduct) => {
+        const updatedProducts = [
+            ...formData.products,
+            newProduct
+        ];
+        setFormData(prev => ({
+            ...prev,
+            products: updatedProducts,
+            amount: recalculateAmount(updatedProducts)
         }));
     };
 
     const removeProduct = (index) => {
+        const updatedProducts = formData.products.filter((_, i) => i !== index);
+
         setFormData(prev => ({
             ...prev,
-            products: prev.products.filter((_, i) => i !== index)
+            products: updatedProducts,
+            amount: recalculateAmount(updatedProducts)
         }));
     };
 
     const validateForm = () => {
+        console.log('validate', formData);
         const newErrors = {};
 
         if (!formData.name.trim()) {
@@ -99,7 +133,7 @@ const TransactionCreateModal = ({
             newErrors.transactionTypeId = 'Тип транзакции обязателен';
         }
 
-        if (!amount || parseFloat(amount) <= 0) {
+        if (!formData.amount || parseFloat(formData.amount) <= 0) {
             newErrors.amount = 'Сумма должна быть больше 0';
         }
 
@@ -118,7 +152,6 @@ const TransactionCreateModal = ({
         if (validateForm()) {
             onSubmit({
                 ...formData,
-                amount,
                 accountId: currentAccount.id
             });
             onClose();
@@ -171,7 +204,7 @@ const TransactionCreateModal = ({
                                             id="transactionTypeId"
                                             className={`form-select ${errors.transactionTypeId ? 'is-invalid' : ''}`}
                                             value={formData.transactionTypeId}
-                                            onChange={handleChange}
+                                            onChange={handleTransactionTypeChange}
                                             name="transactionTypeId"
                                         >
                                             <option value="">Выберите тип</option>
@@ -207,19 +240,21 @@ const TransactionCreateModal = ({
                                             rows="3"
                                         ></textarea>
                                     </div>
-
-                                    <div className="mb-3">
-                                        <label htmlFor="amount" className="form-label">Сумма</label>
-                                        <p>{amount}</p>
-                                        {errors.amount && <div className="invalid-feedback">{errors.amount}</div>}
-                                    </div>
-
-                                    <ProductList
-                                        products={formData.products}
-                                        onProductChange={handleProductChange}
-                                        onAddProduct={addProduct}
-                                        onRemoveProduct={removeProduct}
-                                    />
+                                    {formData.transactionTypeId === transactionTypes[0].id ?
+                                        (<ExpenseFormPart
+                                            amount={formData.amount}
+                                            products={formData.products}
+                                            handleProductChange={handleProductChange}
+                                            errors={errors}
+                                            addProduct={addProduct}
+                                            removeProduct={removeProduct}
+                                        />) : (
+                                            <IncomeFormPart
+                                                amount={formData.amount}
+                                                handleChange={handleAmountChange}
+                                                errors={errors}
+                                            />
+                                        )}
 
                                     <div className="modal-footer">
                                         <button type="button" className="btn btn-secondary" onClick={onClose}>

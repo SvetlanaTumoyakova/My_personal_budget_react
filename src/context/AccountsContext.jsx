@@ -38,6 +38,9 @@ function AccountsProvider({ children }) {
             if (!currentAccount && firstFiveAccounts.length > 0) {
                 setCurrentAccount(firstFiveAccounts[0]);
             }
+            if (currentAccount) {
+                setCurrentAccount(data.find(acc => acc.id === currentAccount.id));
+            }
         } catch (err) {
             setError(err.message);
         } finally {
@@ -51,6 +54,7 @@ function AccountsProvider({ children }) {
 
     const refreshAccounts = () => {
         loadAccounts();
+
     };
 
     const value = {
