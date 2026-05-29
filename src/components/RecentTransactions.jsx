@@ -154,8 +154,6 @@ const RecentTransactions = ({ currentAccountId }) => {
         }
     };
 
-    console.log("cur", currentPage, totalPages);
-
     // Отображение состояния загрузки
     if (loading) {
         return (

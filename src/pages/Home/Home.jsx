@@ -2,24 +2,26 @@ import { useState, useEffect, useContext } from 'react'
 import { NavLink, useNavigate } from "react-router-dom";
 import { AccountsContext } from '../../context/AccountsContext';
 import RecentTransactions from '../../components/RecentTransactions';
-
+import IncomeExpenseChart from '../../components/Сharts/IncomeExpenseChart';
+import CreateAccountModal from '../../components/Account/CreateAccountModal';
 
 function Home() {
     const {
         accounts,
         currentAccount,
         changeCurrentAccount,
+        createAccount,
         refreshAccounts,
         loading,
         error
     } = useContext(AccountsContext);
 
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
     const formatAmount = (amount) => {
         if (!amount) return '0 ₽';
 
         const cleanNumber = amount.toString().replace(/\s/g, '');
-
-        // Преобразуем в число и форматируем с пробелами между разрядами
         const formattedNumber = Number(cleanNumber).toLocaleString('ru-RU');
 
         return `${formattedNumber} ₽`;
@@ -56,6 +58,13 @@ function Home() {
 
     return (
         <div className="container-fluid py-4">
+
+            <CreateAccountModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onCreate={createAccount}
+            />
+
             <div className="row">
                 <div className="col-12 col-md-6">
                     <header className="row mb-4">
@@ -81,9 +90,18 @@ function Home() {
                         {/* Выпадающий список аккаунтов */}
                         <div className="col-12 col-md-6">
                             <div className="card">
-                                <div className="card-header bg-accent text-white">
+                                <div className="card-header bg-accent text-white d-flex justify-content-between align-items-center">
                                     <h4 className="card-title h5 mb-0 finance-font">Выберите аккаунт</h4>
+                                    <button
+                                        className="btn btn-sm btn-outline-light d-flex align-items-center gap-1 ms-2"
+                                        onClick={() => setIsModalOpen(true)}
+                                        title="Создать новый аккаунт"
+                                        disabled={loading}
+                                    >
+                                        <span className="fs-5">+</span>
+                                    </button>
                                 </div>
+
                                 <ul className="list-group list-group-flush">
                                     {accounts.map(account => (
                                         <li
@@ -117,8 +135,7 @@ function Home() {
                 <div className="col-12 col-md-6">
                     {/* Графики*/}
                     <div className="placeholder-section">
-                        <h3>Здесь будут другие элементы</h3>
-                        <p>Например: график расходов, статистика и т. д.</p>
+                        <IncomeExpenseChart />
                     </div>
                 </div>
             </div>

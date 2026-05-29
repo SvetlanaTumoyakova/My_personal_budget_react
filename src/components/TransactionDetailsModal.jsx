@@ -8,8 +8,6 @@ const TransactionDetailsModal = ({ transactionId, isOpen, onClose }) => {
 
     const apiUrl = "/Transaction/details";
 
-    console.log('detail', isOpen);
-
     useEffect(() => {
         if (isOpen && transactionId) {
             fetchTransactionDetails();

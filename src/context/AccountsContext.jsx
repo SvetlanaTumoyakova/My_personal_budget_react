@@ -48,6 +48,38 @@ function AccountsProvider({ children }) {
         }
     }
 
+    const createAccount = async (createAccount) => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const response = await api(apiUrl, {
+                method: 'POST',
+                body: JSON.stringify(createAccount)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Ошибка создания аккаунта');
+            }
+
+            const newAccount = await response.json();
+
+            setAccounts(prevAccounts => [newAccount, ...prevAccounts].slice(0, 5));
+
+            if (!currentAccount) {
+                setCurrentAccount(newAccount);
+            }
+
+            return newAccount;
+        } catch (err) {
+            setError(err.message);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const changeCurrentAccount = (account) => {
         setCurrentAccount(account);
     };
@@ -61,6 +93,7 @@ function AccountsProvider({ children }) {
         accounts,
         currentAccount,
         changeCurrentAccount,
+        createAccount,
         refreshAccounts,
         loading,
         error

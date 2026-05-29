@@ -122,7 +122,6 @@ const TransactionCreateModal = ({
     };
 
     const validateForm = () => {
-        console.log('validate', formData);
         const newErrors = {};
 
         if (!formData.name.trim()) {
@@ -156,8 +155,6 @@ const TransactionCreateModal = ({
             });
             onClose();
         }
-
-        console.log('submit', errors);
 
     };
     if (!isOpen) return null;

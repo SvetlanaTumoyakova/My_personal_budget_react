@@ -7,7 +7,6 @@ const ProductList = ({ products, onProductChange, onAddProduct, onRemoveProduct 
     const handleProductChange = (newProduct) => {
         setProduct(newProduct);
         onAddProduct(newProduct);
-        console.log('newProduct', newProduct);
     }
 
     return (
@@ -21,18 +20,11 @@ const ProductList = ({ products, onProductChange, onAddProduct, onRemoveProduct 
                     value={product}
                     onChange={handleProductChange}
                 />
-                <button
-                    type="button"
-                    onClick={onAddProduct}
-                    className="btn btn-outline-primary btn-sm"
-                >
-                    + Добавить продукт
-                </button>
             </div>
 
             {products.length === 0 ? (
                 <div className="alert alert-info text-center">
-                    Продукты не добавлены. Нажмите «Добавить продукт», чтобы начать.
+                    Продукты не добавлены.
                 </div>
             ) : (
                 products.map((product, index) => (
