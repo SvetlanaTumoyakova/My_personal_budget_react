@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { AccountsProvider } from "./context/AccountsContext";
+import { ProductsProvider } from "./context/ProductsContext";
 import Header from "./components/Header";
 
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -18,7 +19,9 @@ function App() {
             <Route path="/" element={
               <ProtectedRoute>
                 <AccountsProvider>
-                  <Home />
+                  <ProductsProvider>
+                    <Home />
+                  </ProductsProvider>
                 </AccountsProvider>
               </ProtectedRoute>
             }

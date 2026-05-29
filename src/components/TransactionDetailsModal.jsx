@@ -6,7 +6,9 @@ const TransactionDetailsModal = ({ transactionId, isOpen, onClose }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    const apiUrl = "/Transaction";
+    const apiUrl = "/Transaction/details";
+
+    console.log('detail', isOpen);
 
     useEffect(() => {
         if (isOpen && transactionId) {

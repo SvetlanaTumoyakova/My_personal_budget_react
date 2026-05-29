@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import '../assets/RecentTransactions.css';
 import TransactionDetailsModal from './TransactionDetailsModal.jsx'
+import TransactionCreateModal from './CreateTransaction/TransactionCreateModal.jsx'
 import api from '../api/index';
 
 const RecentTransactions = ({ currentAccountId }) => {
@@ -13,6 +14,7 @@ const RecentTransactions = ({ currentAccountId }) => {
 
     const [selectedTransactionId, setSelectedTransactionId] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
     const apiUrl = "/Transaction";
 
@@ -78,26 +80,78 @@ const RecentTransactions = ({ currentAccountId }) => {
         fetchTransactions(1, parseInt(newPerPage, 10));
     };
 
-    // Обработчик кнопки «Новая транзакция»
-    const handleAddTransaction = () => {
-        alert('Переход на форму создания транзакции');
-    };
-
     // обработчик открытия модального окна с деталями транзакции
     const handleViewDetails = (transactionId) => {
         setSelectedTransactionId(transactionId);
         setIsModalOpen(true);
     };
-
-    //  обработчик закрытия модального окна
     const handleCloseModal = () => {
         setIsModalOpen(false);
         setSelectedTransactionId(null);
     };
 
-    console.log("is modal open", isModalOpen);
+    // обработчик открытия модального окна для создания новой транзакции
+    const handleOpenCreateModal = () => {
+        setIsCreateModalOpen(true);
+    };
+    const handleCloseCreateModal = () => {
+        setIsCreateModalOpen(false);
+    };
 
-    // Отображение состояния загрузки (без изменений)
+    // Обработчик создания транзакции
+    const handleCreateTransactionSubmit = async (formData) => {
+        try {
+            setLoading(true);
+
+            const submitData = {
+                name: formData.name.trim(),
+                transactionTypeId: formData.transactionTypeId,
+                date: new Date(formData.date).toISOString(),
+                accountId: formData.accountId,
+                description: formData.description?.trim() || null,
+                amount: parseFloat(formData.amount),
+                products: formData.products.map(product => ({
+                    productId: product.id,
+                    quantity: parseInt(product.quantity, 10)
+                }))
+            };
+
+            // Отправляем запрос на создание транзакции
+            const response = await api('/Transaction', {
+                method: "POST",
+                body: JSON.stringify(submitData)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || 'Не удалось создать транзакцию');
+            }
+
+            setIsCreateModalOpen(false);
+
+            fetchTransactions(1, perPage);
+
+            alert('Транзакция успешно создана!');
+
+        } catch (error) {
+            console.error('Ошибка создания транзакции:', error);
+            if (error.message.includes('network') || error.message.includes('fetch')) {
+                alert('Ошибка сети: проверьте подключение к интернету');
+            } else if (error.response?.status === 400) {
+                alert('Неверные данные: проверьте правильность заполнения формы');
+            } else if (error.response?.status === 403) {
+                alert('У вас нет прав для создания транзакции');
+            } else {
+                alert(`Ошибка: ${error.message || 'Неизвестная ошибка при создании транзакции'}`);
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    console.log("is Create modal open", isCreateModalOpen);
+
+    // Отображение состояния загрузки
     if (loading) {
         return (
             <div className="recent-transactions-container">
@@ -107,7 +161,7 @@ const RecentTransactions = ({ currentAccountId }) => {
         );
     }
 
-    // Отображение ошибки (без изменений)
+    // Отображение ошибки
     if (error) {
         return (
             <div className="recent-transactions-container">
@@ -143,7 +197,7 @@ const RecentTransactions = ({ currentAccountId }) => {
                     <h3 className="subsection-title">Новая транзакция</h3>
                     <button
                         className="add-transaction-btn"
-                        onClick={handleAddTransaction}
+                        onClick={handleOpenCreateModal}
                         aria-label="Добавить новую транзакцию"
                     >
                         +
@@ -200,6 +254,13 @@ const RecentTransactions = ({ currentAccountId }) => {
                     Вперёд
                 </button>
             </div>
+
+            {/* Рендеринг модального окна создания транзакции */}
+            <TransactionCreateModal
+                isOpen={isCreateModalOpen}
+                onClose={handleCloseCreateModal}
+                onSubmit={handleCreateTransactionSubmit}
+            />
 
             {/* рендеринг модального окна */}
             <TransactionDetailsModal
