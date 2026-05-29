@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import '../assets/RecentTransactions.css';
+import TransactionDetailsModal from './TransactionDetailsModal.jsx'
 import api from '../api/index';
 
 const RecentTransactions = ({ currentAccountId }) => {
     const [currentPage, setCurrentPage] = useState(1);
-    const [perPage, setPerPage] = useState(5); // Количество элементов на странице (задаётся на фронтенде)
+    const [perPage, setPerPage] = useState(5);
     const [transactions, setTransactions] = useState([]);
     const [totalPages, setTotalPages] = useState(1);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+
+    const [selectedTransactionId, setSelectedTransactionId] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const apiUrl = "/Transaction";
 
@@ -31,7 +35,6 @@ const RecentTransactions = ({ currentAccountId }) => {
             setTotalPages(data.meta.last_page);
             setCurrentPage(data.meta.current_page);
 
-            // Если сервер вернул предупреждение, показываем его пользователю
             if (data.warning) {
                 alert(data.warning);
             }
@@ -42,10 +45,10 @@ const RecentTransactions = ({ currentAccountId }) => {
         }
     };
 
-    // Загрузка транзакций при монтировании компонента и при смене accountId или perPage
+    // Загрузка транзакций
     useEffect(() => {
         if (currentAccountId) {
-            fetchTransactions(1, perPage); // Загружаем первую страницу с текущим количеством элементов
+            fetchTransactions(1, perPage);
         }
     }, [currentAccountId, perPage]);
 
@@ -69,10 +72,9 @@ const RecentTransactions = ({ currentAccountId }) => {
         }
     };
 
-    // Обработчик изменения количества элементов на странице
+    // Обработчик изменения количества элементов на странице 
     const handlePerPageChange = (newPerPage) => {
         setPerPage(parseInt(newPerPage, 10));
-        // При изменении количества элементов загружаем первую страницу
         fetchTransactions(1, parseInt(newPerPage, 10));
     };
 
@@ -81,7 +83,21 @@ const RecentTransactions = ({ currentAccountId }) => {
         alert('Переход на форму создания транзакции');
     };
 
-    // Отображение состояния загрузки
+    // обработчик открытия модального окна с деталями транзакции
+    const handleViewDetails = (transactionId) => {
+        setSelectedTransactionId(transactionId);
+        setIsModalOpen(true);
+    };
+
+    //  обработчик закрытия модального окна
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setSelectedTransactionId(null);
+    };
+
+    console.log("is modal open", isModalOpen);
+
+    // Отображение состояния загрузки (без изменений)
     if (loading) {
         return (
             <div className="recent-transactions-container">
@@ -91,7 +107,7 @@ const RecentTransactions = ({ currentAccountId }) => {
         );
     }
 
-    // Отображение ошибки
+    // Отображение ошибки (без изменений)
     if (error) {
         return (
             <div className="recent-transactions-container">
@@ -139,15 +155,21 @@ const RecentTransactions = ({ currentAccountId }) => {
             <div className="transactions-list">
                 {transactions.length > 0 ? (
                     transactions.map((transaction) => (
-                        <div key={transaction.id} className={`transaction-item ${transaction.transactionType === 'Income' ? 'income' : 'expense'}`}>
+
+                        <div
+                            key={transaction.id}
+                            className={`transaction-item ${transaction.transactionType === 'Income' ? 'income' : 'expense'}`}
+                            onClick={() => handleViewDetails(transaction.id)}
+                            style={{ cursor: 'pointer' }}
+                        >
                             <div className="transaction-date">
                                 {new Date(transaction.date).toLocaleDateString('ru-RU')}
                             </div>
-                            <div className="transaction-description">{transaction.description}</div>
+                            <div className="transaction-name">{transaction.name}</div>
                             <div className="transaction-amount">
                                 {transaction.transactionType === 'Income'
-                                    ? `+${transaction.amount.toFixed(2)} ₽`
-                                    : `-${transaction.amount.toFixed(2)} ₽`}
+                                    ? ` +${transaction.amount.toFixed(2)} ₽`
+                                    : ` -${transaction.amount.toFixed(2)} ₽`}
                             </div>
                         </div>
                     ))
@@ -178,8 +200,16 @@ const RecentTransactions = ({ currentAccountId }) => {
                     Вперёд
                 </button>
             </div>
+
+            {/* рендеринг модального окна */}
+            <TransactionDetailsModal
+                transactionId={selectedTransactionId}
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+            />
         </div>
     );
 };
 
 export default RecentTransactions;
+

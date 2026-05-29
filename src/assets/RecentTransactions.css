@@ -80,13 +80,25 @@
     border-left: 4px solid #dc3545;
 }
 
+.transaction-item.income .transaction-amount {
+    color: #28a745;
+    /* Зелёный для доходов */
+    font-weight: 500;
+}
+
+.transaction-item.expense .transaction-amount {
+    color: #dc3545;
+    /* Красный для расходов */
+    font-weight: 500;
+}
+
 .transaction-date {
     flex: 1;
     color: #666;
     font-size: 14px;
 }
 
-.transaction-description {
+.transaction-name {
     flex: 2;
     font-weight: 500;
 }
